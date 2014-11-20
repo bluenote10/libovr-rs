@@ -1,0 +1,6 @@
+/modules/oculus_sdk_mac
+/target
+/src/notused
+Cargo.lock
+modules/oculus_sdk_linux/LibOVR/Obj
+modules/oculus_sdk_linux/LibOVR/Lib

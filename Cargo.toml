@@ -1,0 +1,13 @@
+[package]
+
+name = "libovr-rs"
+version = "0.1.0"
+authors = [
+  "Colin Sherratt",
+  "Erick Tryzelaar",
+  "Fabian Keller",
+]
+
+build = "./scripts/compile-for-cargo"
+
+
