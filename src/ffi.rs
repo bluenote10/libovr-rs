@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
-use libc::{c_uint, c_int, c_float, c_char, c_void, c_double, c_short, uint32_t, uintptr_t};
+use libc::{c_uint, c_int, c_float, c_char, c_uchar, c_void, c_double, c_short, uint32_t, uintptr_t};
 use std::ptr;
 use std::default::Default;
 use std::num::FromPrimitive;
@@ -333,6 +333,16 @@ pub struct Texture {
   pub PlatformData: [uintptr_t, ..8],
 }
 
+/// Used by ovrhmd_GetHSWDisplayState to report the current display state.
+#[deriving(Clone, Default, Show)]
+#[repr(C)]
+pub struct HSWDisplayState {
+  pub Displayed: OvrBool,
+  pub StartTime: c_double,
+  pub DismissibleTime: c_double,
+}
+
+
 
 extern "C" {
   pub fn ovr_InitializeRenderingShim();
@@ -359,23 +369,80 @@ extern "C" {
                                   eye: c_uint, 
                                   fov: FovPort,
                                   pixelsPerDisplayPixel: c_float) -> Sizei;
-  pub fn ovrHmd_ConfigureRendering(hmd: Hmd,
+  pub fn ovrHmd_ConfigureRendering(hmd: *mut Hmd,
                                    apiConfig: *const RenderAPIConfig,
                                    distortionCaps: c_uint,
                                    eyeFovIn: *const FovPort,
                                    eyeRenderDescOut: *mut EyeRenderDesc) -> OvrBool;
-  pub fn ovrHmd_BeginFrame(hmd: Hmd, frameIndex: c_uint) -> FrameTiming;
-  pub fn ovrHmd_EndFrame(hmd: Hmd,
+  pub fn ovrHmd_BeginFrame(hmd: *mut Hmd, frameIndex: c_uint) -> FrameTiming;
+  pub fn ovrHmd_EndFrame(hmd: *mut Hmd,
                          renderPose: *const Posef,
                          eyeTexture: *const Texture);
+  pub fn ovrHmd_GetEyePoses(hmd: *mut Hmd, 
+                            frameIndex: c_uint, 
+                            hmdToEyeViewOffset: *mut Posef,
+                            outEyePoses: *mut Posef, 
+                            outHmdTrackingState: *mut TrackingState);
+  pub fn ovrHmd_GetRenderDesc(hmd: *mut Hmd, eyeType: c_uint, fov: FovPort) -> EyeRenderDesc;
+  
+  // TODO: Distortion mesh stuff omitted for the time being...
+  
+  pub fn ovrHmd_GetFrameTiming(hmd: *mut Hmd, frameIndex: c_uint) -> FrameTiming;
+  pub fn ovrHmd_BeginFrameTiming(hmd: *mut Hmd, frameIndex: c_uint) -> FrameTiming;
+  pub fn ovrHmd_EndFrameTiming(hmd: *mut Hmd);
+  pub fn ovrHmd_ResetFrameTiming(hmd: *mut Hmd, frameIndex: c_uint);
+  pub fn ovrHmd_GetEyeTimewarpMatrices(hmd: *mut Hmd, eye: c_uint, renderPose: Posef, twmOut: *mut Matrix4f);
+  
+//-------------------------------------------------------------------------------------
+// ***** Stateless math setup functions
+
+  pub fn ovrMatrix4f_Projection(fov: FovPort, znear: c_float, zfar: c_float, rightHanded: OvrBool) -> Matrix4f;
+  pub fn ovrMatrix4f_OrthoSubProjection(projection: Matrix4f, 
+                                        orthoScale: Vector2f,
+                                        orthoDistance: c_float,
+                                        hmdToEyeViewOffsetX: c_float) -> Matrix4f;
+  pub fn ovr_GetTimeInSeconds() -> c_double;
+  pub fn ovr_WaitTillTime(absTime: c_double) -> c_double;
+  
+// -----------------------------------------------------------------------------------
+// ***** Latency Test interface
+
+  pub fn ovrHmd_ProcessLatencyTest(hmd: *mut Hmd, rgbColorOut: *const c_uchar) -> OvrBool;  
+  pub fn ovrHmd_GetLatencyTestResult(hmd: *mut Hmd) -> *const char;
+  pub fn ovrHmd_GetLatencyTest2DrawColor(hmd: *mut Hmd, rgbColorOut: *const c_uchar);
+  
+//-------------------------------------------------------------------------------------
+// ***** Health and Safety Warning Display interface
+  
+  pub fn ovrHmd_GetHSWDisplayState(hmd: *mut Hmd, hasWarningState: *mut HSWDisplayState);  
+  pub fn ovrHmd_DismissHSWDisplay(hmd: *mut Hmd) -> OvrBool;
+  
+
+  pub fn ovrHmd_GetBool(hmd: *mut Hmd, propertyName: *const char, defaultVal: OvrBool) -> OvrBool;
+  pub fn ovrHmd_SetBool(hmd: *mut Hmd, propertyName: *const char, value: OvrBool) -> OvrBool;
+
+  pub fn ovrHmd_GetInt(hmd: *mut Hmd, propertyName: *const char, defaultVal: c_int) -> c_int;
+  pub fn ovrHmd_SetInt(hmd: *mut Hmd, propertyName: *const char, value: c_int) -> OvrBool;  
+
+  pub fn ovrHmd_GetFloat(hmd: *mut Hmd, propertyName: *const char, defaultVal: c_float) -> c_float;
+  pub fn ovrHmd_SetFloat(hmd: *mut Hmd, propertyName: *const char, value: c_float) -> OvrBool;  
+  
+  pub fn ovrHmd_GetFloatArray(hmd: *mut Hmd, propertyName: *const char, values: *mut c_float, arraySize: c_uint) -> c_uint;
+  pub fn ovrHmd_SetFloatArray(hmd: *mut Hmd, propertyName: *const char, values: *mut c_float, arraySize: c_uint) -> OvrBool;
+
+  pub fn ovrHmd_GetString(hmd: *mut Hmd, propertyName: *const char, defaultVal: *const char) -> *const char;
+  pub fn ovrHmd_SetString(hmd: *mut Hmd, propertyName: *const char, value: *const char) -> OvrBool;
+  
+// -----------------------------------------------------------------------------------
+// ***** Logging  
+  pub fn ovrHmd_StartPerfLog(hmd: *mut Hmd, fileName: *const char, userData1: *const char) -> OvrBool;
+  pub fn ovrHmd_StopPerfLog(hmd: *mut Hmd) -> OvrBool;
+  
 }
 
 
 
 /*
-
-
-
 
 extern "C" {
     pub fn ovr_Initialize() -> bool;
