@@ -362,7 +362,7 @@ extern "C" {
   pub fn ovrHmd_SetEnabledCaps(hmd: *mut Hmd, hmdCaps: c_uint);
   pub fn ovrHmd_ConfigureTracking(hmd: *mut Hmd, 
                                   supportedTrackingCaps: c_uint,
-													        requiredTrackingCaps: c_uint) -> OvrBool;
+                                  requiredTrackingCaps: c_uint) -> OvrBool;
   pub fn ovrHmd_RecenterPose(hmd: *mut Hmd);
   pub fn ovrHmd_GetTrackingState(hmd: *mut Hmd, absTime: c_double) -> TrackingState;
   pub fn ovrHmd_GetFovTextureSize(hmd: *mut Hmd, 
