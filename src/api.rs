@@ -3,11 +3,14 @@
 use super::ffi;
 use libc::{c_int, c_uint, c_void, c_float, c_double};
 use std::string::raw::from_buf;
+use std::default::Default;
 
 pub use ffi::TrackingState;
 pub use ffi::FovPort;
 pub use ffi::Sizei;
-
+pub use ffi::RenderAPIConfig;
+pub use ffi::RenderAPIConfigHeader;
+pub use ffi::EyeRenderDesc;
 
 //-----------------------------------------------------------------------------------
 // Enum wrappers
@@ -299,9 +302,18 @@ impl Hmd {
     }
   }
   
-  pub fn configure_rendering(&self) {
+  pub fn configure_rendering(
+    &self, 
+    api_config: RenderAPIConfig,
+    distortion_caps: DistortionCaps,
+    eye_fov_in: [FovPort, ..2],     
+  ) -> [EyeRenderDesc, ..2] {
     unsafe {
-      //ffi::ovrHmd_ConfigureRendering(self.ptr);
+      let eye_fov_in_ptr: *const FovPort = &eye_fov_in[0];
+      let mut eye_render_desc_out: [EyeRenderDesc, ..2] = [Default::default(), Default::default()];
+      let eye_render_desc_out_ptr: *mut EyeRenderDesc = &mut eye_render_desc_out[0];
+      ffi::ovrHmd_ConfigureRendering(self.ptr, &api_config, distortion_caps.mask, eye_fov_in_ptr, eye_render_desc_out_ptr);
+      eye_render_desc_out
     }
   }
     
