@@ -111,11 +111,11 @@ pub struct FovPort {
 // ***** HMD Types
 
 /// Enumerates all HMD types that we support.
-pub const Hmd_None                         : c_int = 0;
-pub const Hmd_DK1                          : c_int = 3;
-pub const Hmd_DKHD                         : c_int = 4;
-pub const Hmd_DK2                          : c_int = 6;
-pub const Hmd_Other                        : c_int = 7;
+pub const Hmd_None                         : c_uint = 0;
+pub const Hmd_DK1                          : c_uint = 3;
+pub const Hmd_DKHD                         : c_uint = 4;
+pub const Hmd_DK2                          : c_uint = 6;
+pub const Hmd_Other                        : c_uint = 7;
 
 /// HMD capability bits reported by device.
 pub const HmdCap_Present                   : c_uint = 0x0001;
@@ -322,9 +322,9 @@ pub struct RenderAPIConfig {
 /// If RenderViewport is all zeros then the full texture will be used.
 #[repr(C)]
 pub struct TextureHeader {
-    pub API: c_uint,
-    pub TextureSize: Sizei,
-    pub RenderViewport: Recti, 
+  pub API: c_uint,
+  pub TextureSize: Sizei,
+  pub RenderViewport: Recti, 
 }
 
 #[repr(C)]
@@ -350,9 +350,9 @@ extern "C" {
   pub fn ovr_Shutdown();
   pub fn ovr_GetVersionString() -> *const c_char;
   pub fn ovrHmd_Detect() -> c_int;
-  pub fn ovrHmd_Create(index: c_int) -> Hmd;
+  pub fn ovrHmd_Create(index: c_int) -> *mut Hmd;
   pub fn ovrHmd_Destroy(hmd: *mut Hmd);
-  pub fn ovrHmd_CreateDebug(hmd_type: c_uint) -> Hmd;
+  pub fn ovrHmd_CreateDebug(hmd_type: c_uint) -> *mut Hmd;
   pub fn ovrHmd_GetLastError(hmd: *mut Hmd) -> *const char;
   pub fn ovrHmd_AttachToWindow(hmd: *mut Hmd, 
                                window: *mut c_void, 
