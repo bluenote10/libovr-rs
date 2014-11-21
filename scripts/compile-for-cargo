@@ -5,9 +5,9 @@ set -e
 OS=`uname`
 
 if [ "x$OS" = "xLinux" ] ; then 
-    make -C modules/oculus_sdk_linux/LibOVR
-    cp modules/oculus_sdk_linux/LibOVR/Lib/Linux/Release/x86_64/libovr.a $OUT_DIR/
+    make -C deps/oculus_sdk_linux/LibOVR
+    cp deps/oculus_sdk_linux/LibOVR/Lib/Linux/Release/x86_64/libovr.a $OUT_DIR/
 elif [ "x$OS" = "xDarwin" ] ; then
     xcodebuild -project modules/oculus_sdk_mac/LibOVR/Projects/Mac/Xcode/LibOVR.xcodeproj build
-    cp modules/oculus_sdk_mac/LibOVR/Lib/MacOS/Release/libovr.a $OUT_DIR/
+    cp deps/oculus_sdk_mac/LibOVR/Lib/MacOS/Release/libovr.a $OUT_DIR/
 fi
