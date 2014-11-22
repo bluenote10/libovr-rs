@@ -11,6 +11,9 @@ pub use ffi::Sizei;
 pub use ffi::RenderAPIConfig;
 pub use ffi::RenderAPIConfigHeader;
 pub use ffi::EyeRenderDesc;
+pub use ffi::FrameTiming;
+pub use ffi::Vector3f;
+pub use ffi::Posef;
 
 //-----------------------------------------------------------------------------------
 // Enum wrappers
@@ -316,14 +319,32 @@ impl Hmd {
       eye_render_desc_out
     }
   }
-    
-/*
 
-  pub fn ovrHmd_ConfigureRendering(hmd: *mut Hmd,
-                                   apiConfig: *const RenderAPIConfig,
-                                   distortionCaps: c_uint,
-                                   eyeFovIn: *const FovPort,
-                                   eyeRenderDescOut: *mut EyeRenderDesc) -> OvrBool;
+  pub fn begin_frame(&self, frame_index: i32) -> FrameTiming {
+    unsafe {
+      ffi::ovrHmd_BeginFrame(self.ptr, frame_index as c_uint)
+    }
+  }
+
+  pub fn get_eye_poses(&self, frame_index: i32, hmd_to_eye_view_offset: [Vector3f, ..2]) {
+    unsafe {
+      let mut out_eye_poses: [Posef, ..2] = [Default::default(), Default::default()];
+      let out_eye_poses_ptr: *mut Posef = &mut out_eye_poses[0];
+      let mut out_hmd_tracking_state: TrackingState = Default::default();
+      ffi::ovrHmd_GetEyePoses(self.ptr,
+                              frame_index as c_uint,
+                              &hmd_to_eye_view_offset[0],
+                              out_eye_poses_ptr,
+                              &mut out_hmd_tracking_state);
+    }
+  }
+
+/*
+  pub fn ovrHmd_GetEyePoses(hmd: *mut Hmd, 
+                            frameIndex: c_uint, 
+                            hmdToEyeViewOffset: *mut Posef,
+                            outEyePoses: *mut Posef, 
+                            outHmdTrackingState: *mut TrackingState);
 
 
     pub fn get_sensor_state(&self, abs_time: f64) -> SensorState {

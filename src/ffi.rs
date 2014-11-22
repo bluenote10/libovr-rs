@@ -380,7 +380,7 @@ extern "C" {
                          eyeTexture: *const Texture);
   pub fn ovrHmd_GetEyePoses(hmd: *mut Hmd, 
                             frameIndex: c_uint, 
-                            hmdToEyeViewOffset: *mut Posef,
+                            hmdToEyeViewOffset: *const Vector3f, // is not specified as const in the header, but should be?
                             outEyePoses: *mut Posef, 
                             outHmdTrackingState: *mut TrackingState);
   pub fn ovrHmd_GetRenderDesc(hmd: *mut Hmd, eyeType: c_uint, fov: FovPort) -> EyeRenderDesc;
