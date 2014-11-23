@@ -14,6 +14,7 @@ pub use ffi::EyeRenderDesc;
 pub use ffi::FrameTiming;
 pub use ffi::Vector3f;
 pub use ffi::Posef;
+pub use ffi::Matrix4f;
 
 //-----------------------------------------------------------------------------------
 // Enum wrappers
@@ -339,13 +340,46 @@ impl Hmd {
     }
   }
 
-/*
-  pub fn ovrHmd_GetEyePoses(hmd: *mut Hmd, 
-                            frameIndex: c_uint, 
-                            hmdToEyeViewOffset: *mut Posef,
-                            outEyePoses: *mut Posef, 
-                            outHmdTrackingState: *mut TrackingState);
+  pub fn get_render_desc(&self, eye: EyeType, fov: FovPort) -> EyeRenderDesc {
+    unsafe {
+      ffi::ovrHmd_GetRenderDesc(self.ptr, eye.to_ffi(), fov)
+    }
+  }
 
+  pub fn get_frame_timing(&self, frame_index: i32) -> FrameTiming {
+    unsafe {
+      ffi::ovrHmd_GetFrameTiming(self.ptr, frame_index as c_uint)
+    }
+  }
+
+  pub fn begin_frame_timing(&self, frame_index: i32) -> FrameTiming {
+    unsafe {
+      ffi::ovrHmd_BeginFrameTiming(self.ptr, frame_index as c_uint)
+    }
+  }
+
+  pub fn end_frame_timing(&self) {
+    unsafe {
+      ffi::ovrHmd_EndFrameTiming(self.ptr);
+    }
+  }
+
+  pub fn reset_frame_timing(&self, frame_index: i32) {
+    unsafe {
+      ffi::ovrHmd_ResetFrameTiming(self.ptr, frame_index as c_uint);
+    }
+  }
+
+  pub fn get_eye_timewarp_matrices(&self, eye: EyeType, render_pose: Posef) -> Matrix4f {
+    unsafe {
+      let mut twm_out = Matrix4f{ M: [[0f32 as c_float, ..4], ..4] };
+      ffi::ovrHmd_GetEyeTimewarpMatrices(self.ptr, eye.to_ffi(), render_pose, &mut twm_out);
+      twm_out
+    }
+  }
+  
+/*
+  
 
     pub fn get_sensor_state(&self, abs_time: f64) -> SensorState {
         unsafe {
