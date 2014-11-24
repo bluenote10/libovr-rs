@@ -408,8 +408,8 @@ extern "C" {
 // ***** Latency Test interface
 
   pub fn ovrHmd_ProcessLatencyTest(hmd: *mut Hmd, rgbColorOut: *const c_uchar) -> OvrBool;  
-  pub fn ovrHmd_GetLatencyTestResult(hmd: *mut Hmd) -> *const char;
-  pub fn ovrHmd_GetLatencyTest2DrawColor(hmd: *mut Hmd, rgbColorOut: *const c_uchar);
+  pub fn ovrHmd_GetLatencyTestResult(hmd: *mut Hmd) -> *const c_char;
+  pub fn ovrHmd_GetLatencyTest2DrawColor(hmd: *mut Hmd, rgbColorOut: &mut [c_uchar, ..3]);
   
 //-------------------------------------------------------------------------------------
 // ***** Health and Safety Warning Display interface

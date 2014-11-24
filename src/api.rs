@@ -4,6 +4,7 @@ use super::ffi;
 use libc::{c_int, c_uint, c_void, c_float, c_double};
 use std::string::raw::from_buf;
 use std::default::Default;
+use std::c_str::CString;
 
 pub use ffi::TrackingState;
 pub use ffi::FovPort;
@@ -15,6 +16,7 @@ pub use ffi::FrameTiming;
 pub use ffi::Vector3f;
 pub use ffi::Posef;
 pub use ffi::Matrix4f;
+pub use ffi::Vector2f;
 
 //-----------------------------------------------------------------------------------
 // Enum wrappers
@@ -229,6 +231,36 @@ impl Ovr {
       }
     }   
   }
+
+  //-------------------------------------------------------------------------------------
+  // ***** Stateless math setup functions
+
+  pub fn matrix_projection(fov: FovPort, znear: f32, zfar: f32, right_handed: bool) -> Matrix4f {
+    unsafe {
+      ffi::ovrMatrix4f_Projection(fov, znear as c_float, zfar as c_float, if right_handed {1i8} else {0i8})
+    }
+  }
+
+  pub fn matrix_ortho_sub_projection(projection: Matrix4f,
+                                     ortho_scale: Vector2f,
+                                     ortho_distance: f32,
+                                     hmd_to_eye_view_offset: f32) -> Matrix4f {
+    unsafe {
+      ffi::ovrMatrix4f_OrthoSubProjection(projection, ortho_scale, ortho_distance, hmd_to_eye_view_offset)
+    }
+  }
+
+  pub fn get_time_in_seconds() -> f64 {
+    unsafe {
+      ffi::ovr_GetTimeInSeconds() as f64
+    }
+  }
+
+  pub fn wait_till_time(abs_time: f64) -> f64 {
+    unsafe {
+      ffi::ovr_WaitTillTime(abs_time as c_double) as c_double
+    }
+  }
   
 }
 
@@ -377,7 +409,42 @@ impl Hmd {
       twm_out
     }
   }
+
+// -----------------------------------------------------------------------------------
+// ***** Latency Test interface
+
+  pub fn process_latency_test(&self, rgb_color_out: [u8, ..3]) -> bool {
+    unsafe {
+      ffi::ovrHmd_ProcessLatencyTest(self.ptr, &rgb_color_out[0]) == 1i8
+    }
+  }
+
+  pub fn get_latency_test_result(&self) -> String {
+    unsafe {
+      let c_ptr = ffi::ovrHmd_GetLatencyTestResult(self.ptr);
+      let s = CString::new(c_ptr, false);
+      let s_slice = s.as_str().unwrap();
+      s_slice.to_string()
+    }
+  }
+
+  pub fn get_latency_test_draw_color(&self, rgb_color_out: &mut [u8, ..3]) {
+    unsafe {
+      ffi::ovrHmd_GetLatencyTest2DrawColor(self.ptr, rgb_color_out);
+    }
+  }
+
   
+}
+
+impl Drop for Hmd {
+  fn drop(&mut self) {
+    unsafe {ffi::ovrHmd_Destroy(self.ptr)}
+  }
+}
+  
+
+
 /*
   
 
@@ -478,13 +545,6 @@ impl Hmd {
         }
     }
     */
-}
-
-impl Drop for Hmd {
-  fn drop(&mut self) {
-    unsafe {ffi::ovrHmd_Destroy(self.ptr)}
-  }
-}
 
 
 
